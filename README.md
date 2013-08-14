@@ -11,3 +11,5 @@ Compatible Hardware Tested:
 
 - Ettus Research USRP2 & WBX (http://ettus.com)
 - HackRF (http://www.kickstarter.com/projects/mossmann/hackrf-an-open-source-sdr-platform)
+
+![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.gui.png)
