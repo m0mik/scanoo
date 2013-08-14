@@ -3,7 +3,7 @@
 # Gnuradio Python Flow Graph
 # Title: Scanoo Com Rx
 # Author: Mike Jameson M0MIK
-# Generated: Wed Aug 14 17:06:17 2013
+# Generated: Wed Aug 14 17:41:12 2013
 ##################################################
 
 from gnuradio import analog
@@ -179,7 +179,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	proportion=1,
         )
         self.nb_controls.GetPage(0).GridAdd(_squelch_threshold_sizer, 0, 0, 1, 1)
-        self.probe_avg_mag_sqrd = analog.probe_avg_mag_sqrd_c(squelch_threshold, 0.1)
+        self.probe_avg_mag_sqrd = analog.probe_avg_mag_sqrd_c(squelch_threshold-10, 1)
         _volume_sizer = wx.BoxSizer(wx.VERTICAL)
         self._volume_text_box = forms.text_box(
         	parent=self.nb_controls.GetPage(5).GetWin(),
@@ -287,7 +287,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         		val = self.probe_avg_mag_sqrd.unmuted()
         		try: self.set_func_quad_avg_mag_sqrd(val)
         		except AttributeError, e: pass
-        		time.sleep(1.0/(4.1))
+        		time.sleep(1.0/(2.5))
         _func_quad_avg_mag_sqrd_thread = threading.Thread(target=_func_quad_avg_mag_sqrd_probe)
         _func_quad_avg_mag_sqrd_thread.daemon = True
         _func_quad_avg_mag_sqrd_thread.start()
@@ -438,7 +438,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	ref_scale=2.0,
         	sample_rate=channel_samp_rate,
         	fft_size=2**10,
-        	fft_rate=2**5,
+        	fft_rate=2**3,
         	average=True,
         	avg_alpha=0.1,
         	title="Click to Fine Tune",
@@ -529,12 +529,12 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         		val = self.blocks_probe_signal_vx_fft.level()
         		try: self.set_fft_signal_level(val)
         		except AttributeError, e: pass
-        		time.sleep(1.0/(4))
+        		time.sleep(1.0/(2))
         _fft_signal_level_thread = threading.Thread(target=_fft_signal_level_probe)
         _fft_signal_level_thread.daemon = True
         _fft_signal_level_thread.start()
         self.fft_filter_xxx_0_0_0_0 = filter.fft_filter_ccc(quad_decim, (firdes.low_pass_2(1, channel_samp_rate, ch_width, ch_trans, 40, firdes.WIN_HAMMING, 6.76)), 1)
-        self.dc_blocker_xx_0 = filter.dc_blocker_cc(2**10, False)
+        self.dc_blocker_xx_0 = filter.dc_blocker_cc(2**8, False)
         self._channel_click_freq_text_box = forms.text_box(
         	parent=self.nb_controls.GetPage(3).GetWin(),
         	value=self.channel_click_freq,
@@ -557,7 +557,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.blocks_stream_to_vector_0_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, combined_ch_bins)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, fft_len)
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*fft_len)
-        self.blocks_multiply_const_vxx_1_1_1 = blocks.multiply_const_vcc((func_quad_avg_mag_sqrd, ))
         self.blocks_multiply_const_vxx_1_1_0 = blocks.multiply_const_vff((volume, ))
         self.blocks_multiply_const_vxx_1_1 = blocks.multiply_const_vcc((1 if (int(modulation) == 0) else 0, ))
         self.blocks_multiply_const_vxx_1_0 = blocks.multiply_const_vcc((1 if (int(modulation) == 2) else 0, ))
@@ -569,6 +568,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	quad_rate=quad_samp_rate,
         	audio_decimation=audio_decim,
         )
+        self.analog_pwr_squelch_xx_0 = analog.pwr_squelch_cc(squelch_threshold, 0.001, 0, False)
         self.analog_nbfm_rx_0 = analog.nbfm_rx(
         	audio_rate=int(audio_samp_rate),
         	quad_rate=int(quad_samp_rate),
@@ -612,13 +612,13 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.connect((self.dc_blocker_xx_0, 0), (self.wxgui_fftsink2_1_0_0, 0))
         self.connect((self.osmosdr_source_0, 0), (self.dc_blocker_xx_0, 0))
         self.connect((self.blocks_complex_to_mag_0_0, 0), (self.blocks_probe_signal_vx_fft, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.probe_avg_mag_sqrd, 0))
-        self.connect((self.analog_feedforward_agc_cc_0, 0), (self.blocks_multiply_const_vxx_1_1_1, 0))
-        self.connect((self.blocks_multiply_const_vxx_1_1_1, 0), (self.modulation_selector_in, 0))
         self.connect((self.fft_vxx_0, 0), (self.modulation_selector_in_0, 0))
         self.connect((self.modulation_selector_in_0, 1), (self.blocks_complex_to_mag_0_0, 0))
         self.connect((self.modulation_selector_in_0, 0), (self.blocks_null_sink_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.analog_feedforward_agc_cc_0, 0))
+        self.connect((self.analog_feedforward_agc_cc_0, 0), (self.modulation_selector_in, 0))
+        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.analog_pwr_squelch_xx_0, 0))
+        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.analog_feedforward_agc_cc_0, 0))
+        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.probe_avg_mag_sqrd, 0))
 
 
 # QT sink close method reimplementation
@@ -652,10 +652,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.set_left_edge_freq(self.center_freq-(self.samp_rate/2))
         self.set_channel_freq(self.channel_click_freq_rounded if ((self.channel_click_freq_rounded < (self.center_freq + self.samp_rate/2)) and (self.channel_click_freq_rounded > (self.center_freq - self.samp_rate/2))) else self.center_freq)
         self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
-        self.wxgui_waterfallsink2_0.set_baseband_freq(self.center_freq)
-        self.wxgui_waterfallsink2_0_1.set_baseband_freq(self.center_freq)
-        self.wxgui_fftsink2_1_0_0_1.set_baseband_freq(self.center_freq)
-        self.wxgui_fftsink2_1_0_0.set_baseband_freq(self.center_freq)
         self._center_freq_text_box.set_value(self.center_freq)
         self._cfg_center_freq_config = ConfigParser.ConfigParser()
         self._cfg_center_freq_config.read(".scanoo")
@@ -665,6 +661,10 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_center_freq_config.write(open(".scanoo", 'w'))
         self.set_cfg_channel_click_freq(int(self.center_freq))
         self.osmosdr_source_0.set_center_freq(self.center_freq, 0)
+        self.wxgui_fftsink2_1_0_0_1.set_baseband_freq(self.center_freq)
+        self.wxgui_fftsink2_1_0_0.set_baseband_freq(self.center_freq)
+        self.wxgui_waterfallsink2_0.set_baseband_freq(self.center_freq)
+        self.wxgui_waterfallsink2_0_1.set_baseband_freq(self.center_freq)
 
     def get_txt_blocked_freq_list(self):
         return self.txt_blocked_freq_list
@@ -690,10 +690,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.set_channel_freq(self.channel_click_freq_rounded if ((self.channel_click_freq_rounded < (self.center_freq + self.samp_rate/2)) and (self.channel_click_freq_rounded > (self.center_freq - self.samp_rate/2))) else self.center_freq)
         self.set_fft_len(int(self.samp_rate/self.bin_bw))
         self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
-        self.wxgui_waterfallsink2_0.set_sample_rate(self.samp_rate)
-        self.wxgui_waterfallsink2_0_1.set_sample_rate(self.samp_rate)
-        self.wxgui_fftsink2_1_0_0_1.set_sample_rate(self.samp_rate)
-        self.wxgui_fftsink2_1_0_0.set_sample_rate(self.samp_rate)
         self._samp_rate_text_box.set_value(self.samp_rate)
         self._cfg_samp_rate_config = ConfigParser.ConfigParser()
         self._cfg_samp_rate_config.read(".scanoo")
@@ -702,6 +698,10 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_samp_rate_config.set("main", "samp_rate", str(self.samp_rate))
         self._cfg_samp_rate_config.write(open(".scanoo", 'w'))
         self.osmosdr_source_0.set_sample_rate(self.samp_rate)
+        self.wxgui_fftsink2_1_0_0_1.set_sample_rate(self.samp_rate)
+        self.wxgui_fftsink2_1_0_0.set_sample_rate(self.samp_rate)
+        self.wxgui_waterfallsink2_0.set_sample_rate(self.samp_rate)
+        self.wxgui_waterfallsink2_0_1.set_sample_rate(self.samp_rate)
 
     def get_cfg_channel_click_freq(self):
         return self.cfg_channel_click_freq
@@ -864,8 +864,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_max_channel_freq(self, max_channel_freq):
         self.max_channel_freq = max_channel_freq
-        self.wxgui_fftsink2_1_0_0_0.set_baseband_freq(self.max_channel_freq)
         self.set_txt_max_channel_freq(self.max_channel_freq)
+        self.wxgui_fftsink2_1_0_0_0.set_baseband_freq(self.max_channel_freq)
 
     def get_channel_samp_rate(self):
         return self.channel_samp_rate
@@ -874,8 +874,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.channel_samp_rate = channel_samp_rate
         self.set_quad_decim(int(self.channel_samp_rate/self.quad_samp_rate))
         self.set_combined_ch_bins(int(self.channel_samp_rate/self.bin_bw))
-        self.wxgui_fftsink2_1_0_0_0.set_sample_rate(self.channel_samp_rate)
         self.fft_filter_xxx_0_0_0_0.set_taps((firdes.low_pass_2(1, self.channel_samp_rate, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)))
+        self.wxgui_fftsink2_1_0_0_0.set_sample_rate(self.channel_samp_rate)
 
     def get_cfg_volume(self):
         return self.cfg_volume
@@ -968,7 +968,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_squelch_threshold_config.write(open(".scanoo", 'w'))
         self._squelch_threshold_slider.set_value(self.squelch_threshold)
         self._squelch_threshold_text_box.set_value(self.squelch_threshold)
-        self.probe_avg_mag_sqrd.set_threshold(self.squelch_threshold)
+        self.analog_pwr_squelch_xx_0.set_threshold(self.squelch_threshold)
+        self.probe_avg_mag_sqrd.set_threshold(self.squelch_threshold-10)
 
     def get_rf_gain(self):
         return self.rf_gain
@@ -1047,7 +1048,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_func_quad_avg_mag_sqrd(self, func_quad_avg_mag_sqrd):
         self.func_quad_avg_mag_sqrd = func_quad_avg_mag_sqrd
-        self.blocks_multiply_const_vxx_1_1_1.set_k((self.func_quad_avg_mag_sqrd, ))
         self.modulation_selector_in_0.set_output_index(int(self.spectrum_sense_button and not self.func_quad_avg_mag_sqrd))
 
     def get_combined_ch_bins(self):
