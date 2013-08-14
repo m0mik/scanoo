@@ -3,7 +3,7 @@
 # Gnuradio Python Flow Graph
 # Title: Scanoo Com Rx
 # Author: Mike Jameson M0MIK
-# Generated: Wed Aug 14 13:01:07 2013
+# Generated: Wed Aug 14 13:44:11 2013
 ##################################################
 
 from gnuradio import analog
@@ -56,8 +56,13 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.cfg_ch_step_size = cfg_ch_step_size
         self.channel_click_freq = channel_click_freq = cfg_channel_click_freq
         self.ch_step_size = ch_step_size = cfg_ch_step_size
+        self._cfg_samp_rate_config = ConfigParser.ConfigParser()
+        self._cfg_samp_rate_config.read(".scanoo")
+        try: cfg_samp_rate = self._cfg_samp_rate_config.getfloat("main", "samp_rate")
+        except: cfg_samp_rate = 20e6
+        self.cfg_samp_rate = cfg_samp_rate
         self.audio_samp_rate = audio_samp_rate = 48e3
-        self.samp_rate = samp_rate = 20e6
+        self.samp_rate = samp_rate = cfg_samp_rate
         self.quad_samp_rate = quad_samp_rate = audio_samp_rate*4
         self.channel_click_freq_rounded = channel_click_freq_rounded = round(float(channel_click_freq) / ch_step_size, 0) * ch_step_size
         self.left_edge_freq = left_edge_freq = center_freq-(samp_rate/2)
@@ -131,6 +136,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.nb_controls.AddPage(grc_wxgui.Panel(self.nb_controls), "freq")
         self.nb_controls.AddPage(grc_wxgui.Panel(self.nb_controls), "bandwidth")
         self.nb_controls.AddPage(grc_wxgui.Panel(self.nb_controls), "volume")
+        self.nb_controls.AddPage(grc_wxgui.Panel(self.nb_controls), "samp_rate")
         self.GridAdd(self.nb_controls, 2, 0, 1, 1)
         _volume_sizer = wx.BoxSizer(wx.VERTICAL)
         self._volume_text_box = forms.text_box(
@@ -178,6 +184,14 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	proportion=1,
         )
         self.nb_controls.GetPage(0).GridAdd(_squelch_threshold_sizer, 0, 0, 1, 1)
+        self._samp_rate_text_box = forms.text_box(
+        	parent=self.nb_controls.GetPage(6).GetWin(),
+        	value=self.samp_rate,
+        	callback=self.set_samp_rate,
+        	label='samp_rate',
+        	converter=forms.float_converter(),
+        )
+        self.nb_controls.GetPage(6).GridAdd(self._samp_rate_text_box, 0, 0, 1, 1)
         _rf_gain_sizer = wx.BoxSizer(wx.VERTICAL)
         self._rf_gain_text_box = forms.text_box(
         	parent=self.nb_controls.GetPage(1).GetWin(),
@@ -544,19 +558,19 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.center_freq = center_freq
         self.set_left_edge_freq(self.center_freq-(self.samp_rate/2))
         self.set_channel_freq(self.channel_click_freq_rounded if ((self.channel_click_freq_rounded < (self.center_freq + self.samp_rate/2)) and (self.channel_click_freq_rounded > (self.center_freq - self.samp_rate/2))) else self.center_freq)
+        self.set_cfg_channel_click_freq(int(self.center_freq))
+        self.wxgui_waterfallsink2_0.set_baseband_freq(self.center_freq)
+        self.wxgui_waterfallsink2_0_1.set_baseband_freq(self.center_freq)
+        self.wxgui_fftsink2_1_0_0_1.set_baseband_freq(self.center_freq)
+        self.wxgui_fftsink2_1_0_0.set_baseband_freq(self.center_freq)
+        self.osmosdr_source_0.set_center_freq(self.center_freq, 0)
+        self._center_freq_text_box.set_value(self.center_freq)
         self._cfg_center_freq_config = ConfigParser.ConfigParser()
         self._cfg_center_freq_config.read(".scanoo")
         if not self._cfg_center_freq_config.has_section("main"):
         	self._cfg_center_freq_config.add_section("main")
         self._cfg_center_freq_config.set("main", "center_freq", str(self.center_freq))
         self._cfg_center_freq_config.write(open(".scanoo", 'w'))
-        self.set_cfg_channel_click_freq(int(self.center_freq))
-        self._center_freq_text_box.set_value(self.center_freq)
-        self.wxgui_waterfallsink2_0.set_baseband_freq(self.center_freq)
-        self.wxgui_waterfallsink2_0_1.set_baseband_freq(self.center_freq)
-        self.wxgui_fftsink2_1_0_0_1.set_baseband_freq(self.center_freq)
-        self.wxgui_fftsink2_1_0_0.set_baseband_freq(self.center_freq)
-        self.osmosdr_source_0.set_center_freq(self.center_freq, 0)
 
     def get_cfg_channel_click_freq(self):
         return self.cfg_channel_click_freq
@@ -600,6 +614,13 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_ch_step_size_config.set("main", "ch_step_size", str(self.ch_step_size))
         self._cfg_ch_step_size_config.write(open(".scanoo", 'w'))
 
+    def get_cfg_samp_rate(self):
+        return self.cfg_samp_rate
+
+    def set_cfg_samp_rate(self, cfg_samp_rate):
+        self.cfg_samp_rate = cfg_samp_rate
+        self.set_samp_rate(self.cfg_samp_rate)
+
     def get_audio_samp_rate(self):
         return self.audio_samp_rate
 
@@ -622,6 +643,13 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.wxgui_fftsink2_1_0_0_1.set_sample_rate(self.samp_rate)
         self.wxgui_fftsink2_1_0_0.set_sample_rate(self.samp_rate)
         self.osmosdr_source_0.set_sample_rate(self.samp_rate)
+        self._samp_rate_text_box.set_value(self.samp_rate)
+        self._cfg_samp_rate_config = ConfigParser.ConfigParser()
+        self._cfg_samp_rate_config.read(".scanoo")
+        if not self._cfg_samp_rate_config.has_section("main"):
+        	self._cfg_samp_rate_config.add_section("main")
+        self._cfg_samp_rate_config.set("main", "samp_rate", str(self.samp_rate))
+        self._cfg_samp_rate_config.write(open(".scanoo", 'w'))
 
     def get_quad_samp_rate(self):
         return self.quad_samp_rate
