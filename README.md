@@ -14,7 +14,7 @@ Features:
 - Spectrum sense mode with center frequency hopping.
 - Frequency lockout.
 - FFT & waterfall displays.
-- Ajustable squelch.
+- Adjustable squelch.
 - Auto saves settings to '.scanoo'
 - Selectable channel bandwidth.
 
