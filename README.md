@@ -4,6 +4,7 @@ scanoo_rx
 SDR spectrum sensing receiver for GNU Radio 3.7, built with GRC.
 
 Author: Mike Jameson (M0MIK)
+
 Homepage: https://github.com/m0mik/scanoo
 
 GRC File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo.com_rx.grc
