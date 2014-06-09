@@ -21,4 +21,9 @@ Tested Hardware:
 - Ettus Research USRP2 (https://www.ettus.com)
 - HackRF (http://greatscottgadgets.com/hackrf)
 
+![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.gui_main.png)
+
 ![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.gui.png)
+
+![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.grc.png)
+
