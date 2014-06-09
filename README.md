@@ -15,7 +15,7 @@ Features:
 - Frequency lockout.
 - FFT & waterfall displays.
 - Adjustable squelch.
-- Auto saves settings to '.scanoo'
+- Auto saves settings to '.scanoo'.
 - Selectable channel bandwidth.
 
 Tested Hardware:
