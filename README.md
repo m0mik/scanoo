@@ -1,19 +1,22 @@
-Scanoo
+Scanoo_rx_v2
 ======
 
 SDR spectrum sensing receiver for GNU Radio 3.7, built with GRC.
 
+Homepage: https://github.com/m0mik/scanoo
+Author: Mike Jameson (M0MIK)
+
 Features:
-- AM, NBFM & WBFM demodulation
-- Spectrum Sense mode with frequency lockout
-- FFT & Waterfall displays
-- Squelch
-- Auto saves settings to '~/.scanoo'
-- Selectable channel bandwidth
+- AM, NBFM, WBFM, LSB & USB modulation.
+- Spectrum sense mode with center frequency hopping.
+- Frequency lockout.
+- FFT & waterfall displays.
+- Ajustable squelch.
+- Auto saves settings to '.scanoo'
+- Selectable channel bandwidth.
 
-Compatible Hardware Tested:
-- Ettus Research USRP2 & WBX (http://ettus.com)
-- HackRF (http://www.kickstarter.com/projects/mossmann/hackrf-an-open-source-sdr-platform)
-- RTL-SDR
+Tested Hardware:
+- Ettus Research USRP2 (https://www.ettus.com)
+- HackRF (http://greatscottgadgets.com/hackrf)
 
-![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.gui.png)
+![ScreenShot](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx_v2.gui.png)
