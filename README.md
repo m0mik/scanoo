@@ -12,7 +12,7 @@ Homepage: https://github.com/m0mik/scanoo
 GRC File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo.com_rx.grc
 
 Features:
-- AM, NBFM, WBFM, LSB & USB modulation.
+- AM, FM, LSB & USB demodulation.
 - Spectrum sense mode with center frequency hopping.
 - Frequency lockout.
 - FFT & waterfall displays.
@@ -20,9 +20,8 @@ Features:
 - Auto saves settings to '.scanoo'.
 - Selectable channel bandwidth.
 
-Tested Hardware:
-- Ettus Research USRP2 (https://www.ettus.com)
-- HackRF (http://greatscottgadgets.com/hackrf)
+Tested Compatible Hardware:
+- Ettus Research USRP2 & B210 (https://www.ettus.com)
 
 ![Alt text](https://raw.github.com/m0mik/scanoo/master/apps/scanoo.com_rx.gui_main.png)
 
