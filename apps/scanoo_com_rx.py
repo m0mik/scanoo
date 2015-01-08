@@ -3,7 +3,7 @@
 # Gnuradio Python Flow Graph
 # Title: scanoo.com_rx
 # Author: Mike Jameson M0MIK
-# Generated: Thu Jun 12 11:56:58 2014
+# Generated: Thu Jan  8 18:56:39 2015
 ##################################################
 
 from gnuradio import analog
@@ -36,6 +36,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def __init__(self):
         grc_wxgui.top_block_gui.__init__(self, title="scanoo.com_rx")
+        _icon_path = "/usr/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
+        self.SetIcon(wx.Icon(_icon_path, wx.BITMAP_TYPE_ANY))
 
         ##################################################
         # Variables
@@ -49,7 +51,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_samp_rate_config = ConfigParser.ConfigParser()
         self._cfg_samp_rate_config.read(".scanoo")
         try: cfg_samp_rate = self._cfg_samp_rate_config.getfloat("main", "samp_rate")
-        except: cfg_samp_rate = 1e6
+        except: cfg_samp_rate = 100e6/256
         self.cfg_samp_rate = cfg_samp_rate
         self._cfg_blocked_freq_list_config = ConfigParser.ConfigParser()
         self._cfg_blocked_freq_list_config.read(".scanoo")
@@ -75,9 +77,9 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.channel_click_freq = channel_click_freq = 5.505e6
         self.ch_step_size = ch_step_size = cfg_ch_step_size
         self.blocked_bin_list = blocked_bin_list = [int(math.floor(float(((blocked_freq-(center_freq-(samp_rate/2)))/bin_bw))/bin_floor)*bin_floor) for blocked_freq in blocked_freq_list]
-        self.audio_samp_rate = audio_samp_rate = 48e3*1
+        self.audio_samp_rate = audio_samp_rate = 48e3*4
         self.spectrum_sense_button = spectrum_sense_button = 0
-        self.quad_samp_rate = quad_samp_rate = audio_samp_rate*4
+        self.quad_samp_rate = quad_samp_rate = audio_samp_rate*1
         self.max_bin_index = max_bin_index = int(fft_signal_level.index(max([i for j, i in enumerate(fft_signal_level) if (int(math.floor(float(j)/bin_floor)*bin_floor) not in blocked_bin_list )])))
         self.left_edge_freq = left_edge_freq = center_freq - (float(samp_rate)/2)
         self.channel_click_freq_rounded = channel_click_freq_rounded = (round(float(channel_click_freq) / ch_step_size, 0) * ch_step_size)
@@ -127,12 +129,12 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.max_center_freq = max_center_freq = cfg_max_center_freq
         self.lo_offset = lo_offset = (samp_rate/2)*1.25
         self.gui_sizes = gui_sizes = [1250,500]
-        self.gui_refresh_rate = gui_refresh_rate = 2**2
+        self.gui_refresh_rate = gui_refresh_rate = 2**4
         self.gui_ref_level = gui_ref_level = -10
         self.gui_fft_size = gui_fft_size = 2**10
         self.gui_average = gui_average = 0.1
         self.func_quad_avg_mag_sqrd_unmuted = func_quad_avg_mag_sqrd_unmuted = False
-        self.func_probe_rate = func_probe_rate = 10
+        self.func_probe_rate = func_probe_rate = 1
         self.combined_ch_bins = combined_ch_bins = int(float(channel_samp_rate)/bin_bw)
         self.ch_width = ch_width = min(cfg_ch_width,((quad_samp_rate/2)*0.9))
         self.ch_trans = ch_trans = min(cfg_ch_trans,int(quad_samp_rate*0.99))
@@ -509,7 +511,7 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         
         self.wxgui_fftsink2_1_0_0_0.set_callback(wxgui_fftsink2_1_0_0_0_callback)
         self.uhd_usrp_source_0_0_1_0 = uhd.usrp_source(
-        	",".join(("addr=192.168.10.3", "")),
+        	",".join(("addr=192.168.10.1", "")),
         	uhd.stream_args(
         		cpu_format="fc32",
         		channels=range(1),
@@ -517,10 +519,11 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         )
         self.uhd_usrp_source_0_0_1_0.set_clock_source("external", 0)
         self.uhd_usrp_source_0_0_1_0.set_time_source("external", 0)
+        self.uhd_usrp_source_0_0_1_0.set_subdev_spec("A:B", 0)
         self.uhd_usrp_source_0_0_1_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0_0_1_0.set_center_freq(uhd.tune_request(center_freq, rf_freq=(center_freq + lo_offset),rf_freq_policy=uhd.tune_request.POLICY_MANUAL), 0)
         self.uhd_usrp_source_0_0_1_0.set_gain(rx_gain, 0)
-        self.uhd_usrp_source_0_0_1_0.set_antenna("RXA", 0)
+        self.uhd_usrp_source_0_0_1_0.set_antenna("RXB", 0)
         (self.uhd_usrp_source_0_0_1_0).set_processor_affinity([1])
         self._txt_center_freq_text_box = forms.text_box(
         	parent=self.nb_controls.GetPage(0).GetWin(),
@@ -619,9 +622,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self.blocks_multiply_const_vxx_1_1_0 = blocks.multiply_const_vff((float(volume)/10, ))
         (self.blocks_multiply_const_vxx_1_1_0).set_processor_affinity([1])
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vff((0, ))
-        self.blocks_keep_m_in_n_0_0_0_0_0 = blocks.keep_m_in_n(gr.sizeof_gr_complex, 1, audio_decim, 0)
-        self.blocks_keep_m_in_n_0_0_0_0 = blocks.keep_m_in_n(gr.sizeof_gr_complex, 1, audio_decim, 0)
-        self.blocks_keep_m_in_n_0_0_0 = blocks.keep_m_in_n(gr.sizeof_gr_complex, 1, audio_decim, 0)
         self.blocks_keep_m_in_n_0_0 = blocks.keep_m_in_n(gr.sizeof_gr_complex, combined_ch_bins, fft_len, int(bin_index-(float(combined_ch_bins)/2)))
         (self.blocks_keep_m_in_n_0_0).set_processor_affinity([1])
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
@@ -645,8 +645,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	tau=50e-6,
         	max_dev=5e3,
         )
-        self.analog_feedforward_agc_cc_0_0 = analog.feedforward_agc_cc(1024, 1)
-        self.analog_feedforward_agc_cc_0 = analog.feedforward_agc_cc(1024, 1)
         self.analog_const_source_x_0 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, center_freq if (not center_freq_hop_button) else (min_center_freq if ((func_center_freq[0] > max_center_freq) or (func_center_freq[0] < min_center_freq)) else (func_center_freq[0] + center_freq_step)) if (not func_quad_avg_mag_sqrd_unmuted) else center_freq)
         self.analog_am_demod_cf_0 = analog.am_demod_cf(
         	channel_rate=quad_samp_rate,
@@ -659,55 +657,48 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.fft_vxx_0_0, 0), (self.blocks_vector_to_stream_0_0, 0))
-        self.connect((self.modulation_selector_in_0, 0), (self.blocks_null_sink_0, 0))
-        self.connect((self.modulation_selector_in_0, 1), (self.blocks_complex_to_mag_0_0, 0))
-        self.connect((self.fft_vxx_0, 0), (self.modulation_selector_in_0, 0))
-        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.fft_filter_xxx_0_0_0_0, 0))
-        self.connect((self.blocks_stream_to_vector_0, 0), (self.fft_vxx_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.wxgui_fftsink2_1_0_0_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.wxgui_scopesink2_0, 0))
-        self.connect((self.blocks_keep_m_in_n_0_0, 0), (self.blocks_stream_to_vector_0_0, 0))
-        self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_keep_m_in_n_0_0, 0))
-        self.connect((self.blocks_stream_to_vector_0_0, 0), (self.fft_vxx_0_0, 0))
-        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.analog_feedforward_agc_cc_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.analog_pwr_squelch_xx_0, 0))
-        self.connect((self.blocks_complex_to_mag_0_0, 0), (self.blocks_probe_signal_vx_fft, 0))
-        self.connect((self.modulation_selector_in, 0), (self.analog_am_demod_cf_0, 0))
-        self.connect((self.analog_am_demod_cf_0, 0), (self.modulation_selector_out, 0))
-        self.connect((self.analog_nbfm_rx_0, 0), (self.modulation_selector_out, 1))
-        self.connect((self.analog_feedforward_agc_cc_0, 0), (self.modulation_selector_in, 0))
-        self.connect((self.modulation_selector_in, 1), (self.analog_nbfm_rx_0, 0))
-        self.connect((self.blocks_complex_to_real_2, 0), (self.blocks_multiply_const_vxx_1_1_0, 0))
-        self.connect((self.analog_feedforward_agc_cc_0_0, 0), (self.blocks_complex_to_real_2, 0))
-        self.connect((self.blocks_float_to_complex_0, 0), (self.analog_feedforward_agc_cc_0_0, 0))
-        self.connect((self.modulation_selector_out, 0), (self.blocks_float_to_complex_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.blocks_complex_to_real_1_0, 0))
-        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_fftsink2_1_0_0_1, 0))
-        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.blocks_stream_to_vector_0, 0))
-        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_fftsink2_1_0_0_1_0, 0))
-        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_waterfallsink2_0, 0))
-        self.connect((self.modulation_selector_in, 2), (self.blocks_keep_m_in_n_0_0_0, 0))
-        self.connect((self.modulation_selector_in, 3), (self.blocks_keep_m_in_n_0_0_0_0, 0))
-        self.connect((self.blocks_complex_to_real_0, 0), (self.modulation_selector_out, 2))
-        self.connect((self.blocks_complex_to_real_1, 0), (self.modulation_selector_out, 3))
-        self.connect((self.fft_vxx_0, 0), (self.blocks_vector_to_stream_0, 0))
-        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.probe_avg_mag_sqrd, 0))
-        self.connect((self.blocks_multiply_const_vxx_1_1_0, 0), (self.audio_sink_0_0, 0))
-        self.connect((self.blocks_keep_m_in_n_0_0_0, 0), (self.blocks_complex_to_real_0, 0))
-        self.connect((self.blocks_keep_m_in_n_0_0_0_0, 0), (self.blocks_complex_to_real_1, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.probe_center_freq, 0))
-        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_xx_0, 1))
-        self.connect((self.analog_const_source_x_0, 0), (self.blocks_add_xx_0, 0))
-        self.connect((self.blocks_complex_to_real_1_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_waterfallsink2_0_1, 0))
-        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.wxgui_waterfallsink2_0_1_0, 0))
-        self.connect((self.blocks_keep_m_in_n_0_0_0_0_0, 0), (self.blocks_complex_to_real_1_1, 0))
-        self.connect((self.modulation_selector_in, 4), (self.blocks_keep_m_in_n_0_0_0_0_0, 0))
-        self.connect((self.blocks_complex_to_real_1_1, 0), (self.modulation_selector_out, 4))
+        self.connect((self.analog_am_demod_cf_0, 0), (self.modulation_selector_out, 0))    
+        self.connect((self.analog_const_source_x_0, 0), (self.blocks_add_xx_0, 0))    
+        self.connect((self.analog_nbfm_rx_0, 0), (self.modulation_selector_out, 1))    
+        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.blocks_complex_to_real_1_0, 0))    
+        self.connect((self.analog_pwr_squelch_xx_0, 0), (self.modulation_selector_in, 0))    
+        self.connect((self.blocks_add_xx_0, 0), (self.probe_center_freq, 0))    
+        self.connect((self.blocks_complex_to_mag_0_0, 0), (self.blocks_probe_signal_vx_fft, 0))    
+        self.connect((self.blocks_complex_to_real_0, 0), (self.modulation_selector_out, 2))    
+        self.connect((self.blocks_complex_to_real_1, 0), (self.modulation_selector_out, 3))    
+        self.connect((self.blocks_complex_to_real_1_0, 0), (self.blocks_multiply_const_vxx_0, 0))    
+        self.connect((self.blocks_complex_to_real_1_1, 0), (self.modulation_selector_out, 4))    
+        self.connect((self.blocks_complex_to_real_2, 0), (self.blocks_multiply_const_vxx_1_1_0, 0))    
+        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_complex_to_real_2, 0))    
+        self.connect((self.blocks_keep_m_in_n_0_0, 0), (self.blocks_stream_to_vector_0_0, 0))    
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_add_xx_0, 1))    
+        self.connect((self.blocks_multiply_const_vxx_1_1_0, 0), (self.audio_sink_0_0, 0))    
+        self.connect((self.blocks_stream_to_vector_0, 0), (self.fft_vxx_0, 0))    
+        self.connect((self.blocks_stream_to_vector_0_0, 0), (self.fft_vxx_0_0, 0))    
+        self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_keep_m_in_n_0_0, 0))    
+        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.fft_filter_xxx_0_0_0_0, 0))    
+        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.wxgui_fftsink2_1_0_0_0, 0))    
+        self.connect((self.blocks_vector_to_stream_0_0, 0), (self.wxgui_waterfallsink2_0_1_0, 0))    
+        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.analog_pwr_squelch_xx_0, 0))    
+        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.probe_avg_mag_sqrd, 0))    
+        self.connect((self.fft_filter_xxx_0_0_0_0, 0), (self.wxgui_scopesink2_0, 0))    
+        self.connect((self.fft_vxx_0, 0), (self.blocks_vector_to_stream_0, 0))    
+        self.connect((self.fft_vxx_0, 0), (self.modulation_selector_in_0, 0))    
+        self.connect((self.fft_vxx_0_0, 0), (self.blocks_vector_to_stream_0_0, 0))    
+        self.connect((self.modulation_selector_in, 0), (self.analog_am_demod_cf_0, 0))    
+        self.connect((self.modulation_selector_in, 1), (self.analog_nbfm_rx_0, 0))    
+        self.connect((self.modulation_selector_in, 2), (self.blocks_complex_to_real_0, 0))    
+        self.connect((self.modulation_selector_in, 3), (self.blocks_complex_to_real_1, 0))    
+        self.connect((self.modulation_selector_in, 4), (self.blocks_complex_to_real_1_1, 0))    
+        self.connect((self.modulation_selector_in_0, 1), (self.blocks_complex_to_mag_0_0, 0))    
+        self.connect((self.modulation_selector_in_0, 0), (self.blocks_null_sink_0, 0))    
+        self.connect((self.modulation_selector_out, 0), (self.blocks_float_to_complex_0, 0))    
+        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.blocks_stream_to_vector_0, 0))    
+        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_fftsink2_1_0_0_1, 0))    
+        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_fftsink2_1_0_0_1_0, 0))    
+        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_waterfallsink2_0, 0))    
+        self.connect((self.uhd_usrp_source_0_0_1_0, 0), (self.wxgui_waterfallsink2_0_1, 0))    
 
-
-# QT sink close method reimplementation
 
     def get_cfg_min_center_freq(self):
         return self.cfg_min_center_freq
@@ -772,23 +763,23 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_center_freq_step(self.samp_rate*0.7)
-        self.set_left_edge_freq(self.center_freq - (float(self.samp_rate)/2))
-        self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
         self.set_fft_len(int(float(self.samp_rate)/self.bin_bw))
+        self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
+        self.set_left_edge_freq(self.center_freq - (float(self.samp_rate)/2))
+        self.set_center_freq_step(self.samp_rate*0.7)
         self.set_lo_offset((self.samp_rate/2)*1.25)
+        self.wxgui_fftsink2_1_0_0_1.set_sample_rate(self.samp_rate)
+        self._samp_rate_text_box.set_value(self.samp_rate)
+        self.wxgui_fftsink2_1_0_0_1_0.set_sample_rate(self.samp_rate)
+        self.wxgui_waterfallsink2_0.set_sample_rate(self.samp_rate)
+        self.wxgui_waterfallsink2_0_1.set_sample_rate(self.samp_rate)
         self._cfg_samp_rate_config = ConfigParser.ConfigParser()
         self._cfg_samp_rate_config.read(".scanoo")
         if not self._cfg_samp_rate_config.has_section("main"):
         	self._cfg_samp_rate_config.add_section("main")
         self._cfg_samp_rate_config.set("main", "samp_rate", str(self.samp_rate))
         self._cfg_samp_rate_config.write(open(".scanoo", 'w'))
-        self.wxgui_fftsink2_1_0_0_1.set_sample_rate(self.samp_rate)
-        self._samp_rate_text_box.set_value(self.samp_rate)
         self.uhd_usrp_source_0_0_1_0.set_samp_rate(self.samp_rate)
-        self.wxgui_fftsink2_1_0_0_1_0.set_sample_rate(self.samp_rate)
-        self.wxgui_waterfallsink2_0.set_sample_rate(self.samp_rate)
-        self.wxgui_waterfallsink2_0_1.set_sample_rate(self.samp_rate)
 
     def get_func_center_freq(self):
         return self.func_center_freq
@@ -812,11 +803,11 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_bin_bw(self, bin_bw):
         self.bin_bw = bin_bw
-        self.set_bin_index(self.max_bin_index if self.spectrum_sense_button else (float(self.channel_click_freq_rounded - self.left_edge_freq)/self.bin_bw))
-        self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
-        self.set_bin_floor(int(150e3/self.bin_bw))
-        self.set_combined_ch_bins(int(float(self.channel_samp_rate)/self.bin_bw))
         self.set_fft_len(int(float(self.samp_rate)/self.bin_bw))
+        self.set_combined_ch_bins(int(float(self.channel_samp_rate)/self.bin_bw))
+        self.set_bin_floor(int(150e3/self.bin_bw))
+        self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
+        self.set_bin_index(self.max_bin_index if self.spectrum_sense_button else (float(self.channel_click_freq_rounded - self.left_edge_freq)/self.bin_bw))
         self.set_max_channel_freq((round(float(self.left_edge_freq+(self.bin_bw*self.bin_index))/ self.ch_step_size, 0) * self.ch_step_size))
 
     def get_fft_len(self):
@@ -839,14 +830,14 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
-        self.set_left_edge_freq(self.center_freq - (float(self.samp_rate)/2))
         self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
+        self.set_left_edge_freq(self.center_freq - (float(self.samp_rate)/2))
         self.wxgui_fftsink2_1_0_0_1.set_baseband_freq(float(self.center_freq))
         self.analog_const_source_x_0.set_offset(self.center_freq if (not self.center_freq_hop_button) else (self.min_center_freq if ((self.func_center_freq[0] > self.max_center_freq) or (self.func_center_freq[0] < self.min_center_freq)) else (self.func_center_freq[0] + self.center_freq_step)) if (not self.func_quad_avg_mag_sqrd_unmuted) else self.center_freq)
-        self.uhd_usrp_source_0_0_1_0.set_center_freq(uhd.tune_request(self.center_freq, rf_freq=(self.center_freq + self.lo_offset),rf_freq_policy=uhd.tune_request.POLICY_MANUAL), 0)
         self.wxgui_fftsink2_1_0_0_1_0.set_baseband_freq(float(self.center_freq))
         self.wxgui_waterfallsink2_0.set_baseband_freq(float(self.center_freq))
         self.wxgui_waterfallsink2_0_1.set_baseband_freq(float(self.center_freq))
+        self.uhd_usrp_source_0_0_1_0.set_center_freq(uhd.tune_request(self.center_freq, rf_freq=(self.center_freq + self.lo_offset),rf_freq_policy=uhd.tune_request.POLICY_MANUAL), 0)
 
     def get_blocked_freq_list(self):
         return self.blocked_freq_list
@@ -860,8 +851,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_bin_floor(self, bin_floor):
         self.bin_floor = bin_floor
-        self.set_max_bin_index(int(self.fft_signal_level.index(max([i for j, i in enumerate(self.fft_signal_level) if (int(math.floor(float(j)/self.bin_floor)*self.bin_floor) not in self.blocked_bin_list )]))))
         self.set_blocked_bin_list([int(math.floor(float(((blocked_freq-(self.center_freq-(self.samp_rate/2)))/self.bin_bw))/self.bin_floor)*self.bin_floor) for blocked_freq in self.blocked_freq_list])
+        self.set_max_bin_index(int(self.fft_signal_level.index(max([i for j, i in enumerate(self.fft_signal_level) if (int(math.floor(float(j)/self.bin_floor)*self.bin_floor) not in self.blocked_bin_list )]))))
 
     def get_fft_signal_level(self):
         return self.fft_signal_level
@@ -905,8 +896,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_audio_samp_rate(self, audio_samp_rate):
         self.audio_samp_rate = audio_samp_rate
+        self.set_quad_samp_rate(self.audio_samp_rate*1)
         self.set_audio_decim(int(self.quad_samp_rate/self.audio_samp_rate))
-        self.set_quad_samp_rate(self.audio_samp_rate*4)
 
     def get_spectrum_sense_button(self):
         return self.spectrum_sense_button
@@ -921,9 +912,9 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_quad_samp_rate(self, quad_samp_rate):
         self.quad_samp_rate = quad_samp_rate
-        self.set_channel_samp_rate((self.quad_samp_rate*1))
-        self.set_quad_decim(int(self.channel_samp_rate/self.quad_samp_rate))
         self.set_audio_decim(int(self.quad_samp_rate/self.audio_samp_rate))
+        self.set_quad_decim(int(self.channel_samp_rate/self.quad_samp_rate))
+        self.set_channel_samp_rate((self.quad_samp_rate*1))
         self.set_ch_trans(min(self.cfg_ch_trans,int(self.quad_samp_rate*0.99)))
         self.set_ch_width(min(self.cfg_ch_width,((self.quad_samp_rate/2)*0.9)))
         self.wxgui_scopesink2_0.set_sample_rate(self.quad_samp_rate)
@@ -956,10 +947,10 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_channel_samp_rate(self, channel_samp_rate):
         self.channel_samp_rate = channel_samp_rate
-        self.set_quad_decim(int(self.channel_samp_rate/self.quad_samp_rate))
         self.set_combined_ch_bins(int(float(self.channel_samp_rate)/self.bin_bw))
-        self.fft_filter_xxx_0_0_0_0.set_taps(((firdes.complex_band_pass_2(1, self.channel_samp_rate, -self.ch_width, 1, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 2) else ((firdes.complex_band_pass_2(1, self.channel_samp_rate, -1, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 3) else (firdes.low_pass_2(1, self.channel_samp_rate, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)))))
+        self.set_quad_decim(int(self.channel_samp_rate/self.quad_samp_rate))
         self.wxgui_waterfallsink2_0_1_0.set_sample_rate(self.channel_samp_rate)
+        self.fft_filter_xxx_0_0_0_0.set_taps(((firdes.complex_band_pass_2(1, self.channel_samp_rate, -self.ch_width, 1, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 2) else ((firdes.complex_band_pass_2(1, self.channel_samp_rate, -1, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 3) else (firdes.low_pass_2(1, self.channel_samp_rate, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)))))
 
     def get_cfg_volume(self):
         return self.cfg_volume
@@ -1046,8 +1037,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         self._cfg_squelch_threshold_config.write(open(".scanoo", 'w'))
         self._squelch_threshold_slider.set_value(self.squelch_threshold)
         self._squelch_threshold_text_box.set_value(self.squelch_threshold)
-        self.analog_pwr_squelch_xx_0.set_threshold(self.squelch_threshold)
         self.probe_avg_mag_sqrd.set_threshold(self.squelch_threshold)
+        self.analog_pwr_squelch_xx_0.set_threshold(self.squelch_threshold)
 
     def get_rx_gain(self):
         return self.rx_gain
@@ -1081,10 +1072,10 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
         	self._cfg_modulation_config.add_section("main")
         self._cfg_modulation_config.set("main", "modulation", str(self.modulation))
         self._cfg_modulation_config.write(open(".scanoo", 'w'))
-        self.fft_filter_xxx_0_0_0_0.set_taps(((firdes.complex_band_pass_2(1, self.channel_samp_rate, -self.ch_width, 1, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 2) else ((firdes.complex_band_pass_2(1, self.channel_samp_rate, -1, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 3) else (firdes.low_pass_2(1, self.channel_samp_rate, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)))))
         self._modulation_chooser.set_value(self.modulation)
-        self.modulation_selector_in.set_output_index(int(self.modulation))
         self.modulation_selector_out.set_input_index(int(self.modulation))
+        self.modulation_selector_in.set_output_index(int(self.modulation))
+        self.fft_filter_xxx_0_0_0_0.set_taps(((firdes.complex_band_pass_2(1, self.channel_samp_rate, -self.ch_width, 1, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 2) else ((firdes.complex_band_pass_2(1, self.channel_samp_rate, -1, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)) if (self.modulation == 3) else (firdes.low_pass_2(1, self.channel_samp_rate, self.ch_width, self.ch_trans, 40, firdes.WIN_HAMMING, 6.76)))))
 
     def get_max_channel_freq(self):
         return self.max_channel_freq
@@ -1092,8 +1083,8 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
     def set_max_channel_freq(self, max_channel_freq):
         self.max_channel_freq = max_channel_freq
         self._max_channel_freq_text_box.set_value(self.max_channel_freq)
-        self.wxgui_fftsink2_1_0_0_0.set_baseband_freq(self.max_channel_freq)
         self.wxgui_waterfallsink2_0_1_0.set_baseband_freq(self.max_channel_freq)
+        self.wxgui_fftsink2_1_0_0_0.set_baseband_freq(self.max_channel_freq)
 
     def get_max_center_freq(self):
         return self.max_center_freq
@@ -1212,9 +1203,6 @@ class scanoo_com_rx(grc_wxgui.top_block_gui):
 
     def set_audio_decim(self, audio_decim):
         self.audio_decim = audio_decim
-        self.blocks_keep_m_in_n_0_0_0.set_n(self.audio_decim)
-        self.blocks_keep_m_in_n_0_0_0_0.set_n(self.audio_decim)
-        self.blocks_keep_m_in_n_0_0_0_0_0.set_n(self.audio_decim)
 
 if __name__ == '__main__':
     import ctypes
