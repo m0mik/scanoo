@@ -1,7 +1,7 @@
 scanoo_rx
 ======
 
-This project no longer works so please try Ham2Mon instead -> https://github.com/madengr/ham2mon
+This project no longer works so please try Ham2Mon -> https://github.com/madengr/ham2mon
 
 ---
 SDR spectrum sensing receiver for GNU Radio 3.7, built with GRC.
