@@ -9,6 +9,7 @@ SDR spectrum sensing receiver for GNU Radio 3.7, built with GRC.
 Homepage: https://github.com/m0mik/scanoo
 
 Python File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo_com_rx.py
+
 GRC File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo.com_rx.grc
 
 Features:
