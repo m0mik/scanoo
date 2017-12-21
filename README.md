@@ -1,14 +1,14 @@
 scanoo_rx
 ======
 
+This project no longer works so please try Ham2Mon instead -> https://github.com/madengr/ham2mon
+
+---
 SDR spectrum sensing receiver for GNU Radio 3.7, built with GRC.
-
-Author: Mike Jameson M0MIK
-
-BTC Donation Address: 1LCMXmjLipzoiWD5Ahc6kBkJQwQNRLbjGa
 
 Homepage: https://github.com/m0mik/scanoo
 
+Python File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo_com_rx.py
 GRC File: https://raw.githubusercontent.com/m0mik/scanoo/master/apps/scanoo.com_rx.grc
 
 Features:
